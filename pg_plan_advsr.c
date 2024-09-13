@@ -195,8 +195,12 @@ static void pg_plan_advsr_ExecutorFinish_hook(QueryDesc *queryDesc);
 static void pg_plan_advsr_ExecutorEnd_hook(QueryDesc *queryDesc);
 
 /* Utility functions */
-static bool pg_plan_advsr_query_walker(Node *parsetree);
-
+static bool pg_plan_advsr_query_walker(Node *parsetree
+#if PG_VERSION_NUM < 160000
+									  );
+#else
+									  ,void *context);
+#endif  /* PG_VERSION_NUM */
 
 #if PG_VERSION_NUM < 140000
 /* This function came from pg_hint_plan.c */
@@ -1341,7 +1345,12 @@ hash_query(const char *query)
  * Detect if the current utility command is EXPLAIN with ANALYZE option.
  */
 static bool
-pg_plan_advsr_query_walker(Node *parsetree)
+pg_plan_advsr_query_walker(Node *parsetree
+#if PG_VERSION_NUM < 160000
+						  )
+#else
+						  ,void *context)
+#endif  /* PG_VERSION_NUM */
 {
 	if (parsetree == NULL)
 		return false;
